@@ -1,1 +1,1 @@
-# Excel stand alone apps
+# Excel stand alone apps source code
