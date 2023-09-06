@@ -4,13 +4,14 @@ import pandas as pd
 import os
 import numpy as np
 import re
+import xlwings as xw
 
 # Declare df as a global variable
 df = None
 
 # initalise the tkinter GUI
 root = tk.Tk()
-root.title("Excel Automation Application")
+root.title("eBay Transaction Report Consolidation")
 
 root.geometry("600x600") # set the root dimensions
 root.pack_propagate(False) # tells the root to not let the widgets inside it determine its size.
@@ -87,7 +88,7 @@ def Transform_1():
             df['Transaction creation date'] = df['Transaction creation date'].dt.strftime('%d-%m-%Y')
             
             # List of values to be removed
-            values_to_remove = ['Payment dispute', 'Payout']
+            values_to_remove = ['Payment dispute','Payout']
 
             # Filter rows with specified values in the 'Type' column
             rows_to_remove = df[df['Type'].isin(values_to_remove)]
@@ -129,7 +130,6 @@ def Transform_1():
             
             # Filter the DataFrame to include only 'Order' type rows
             df_order = df[df['Type'] == 'Order']
-            
             
             # Perform aggregation
             df_aggregated = df.groupby('Order number').agg({
@@ -230,6 +230,22 @@ def Transform_1():
             file_path = os.path.join(os.path.expanduser("~"), "Desktop", "eBay Transaction Report Consolidation.xlsx")
             df3.to_excel(file_path, index=False, freeze_panes=(1, 1))
 
+            # Open the Excel file and set all columns width to 15
+            with xw.App(visible=False) as app:
+               wb = xw.Book(file_path)
+
+               # Loop through all worksheets in the workbook
+               for ws in wb.sheets:
+                   # Loop through all columns in the worksheet
+                   for column in ws.api.UsedRange.Columns:
+                       column.ColumnWidth = 15
+
+               # Save the workbook if needed
+               wb.save()
+
+               # Close the workbook
+               wb.close()
+
 
     except ValueError:
         tk.messagebox.showerror("Information", "The file you have chosen is invalid")
@@ -255,3 +271,4 @@ def clear_data():
     return None
 
 root.mainloop()
+
